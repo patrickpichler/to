@@ -6,6 +6,7 @@ usage(){
  cat <<EOF
 usage:
  to -n <label> [<program>]  # new session
+ to -d <label> [<program>]  # new session but not detached
  to <label>                 # existing session
  to -l                      # list sessions
 EOF
@@ -17,6 +18,13 @@ n(){
  TO="$1"
  shift 
  exec dtach -c "$TO_DIR/$TO" "$@"
+}
+
+d(){
+ m=`umask`; umask 0077; mkdir -p "$TO_DIR"; umask "$m"
+ TO="$1"
+ shift 
+ exec dtach -n "$TO_DIR/$TO" "$@"
 }
 
 l() {
@@ -34,6 +42,13 @@ if [ x"$1" = x"-n" ]; then
   ARG_COUNT=$#
  [ $ARG_COUNT -eq 0 ] && n "$NAME" "$SHELL"
  [ $ARG_COUNT -gt 0 ] && n "$NAME" "$@"
+ usage
+ elif [ x"$1" = x"-d" ]; then
+  shift
+  NAME=$1
+  shift
+  ARG_COUNT=$#
+ [ $ARG_COUNT -gt 0 ] && d "$NAME" "$@"
  usage
 elif [ x"$1" = x"-l" ]; then
  [ $# -eq 1 ] && l
