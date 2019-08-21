@@ -14,7 +14,9 @@ EOF
 
 n(){
  m=`umask`; umask 0077; mkdir -p "$TO_DIR"; umask "$m"
- TO="$1" exec dtach -c "$TO_DIR/$1" "$2"
+ TO="$1"
+ shift 
+ exec dtach -c "$TO_DIR/$TO" "$@"
 }
 
 l() {
@@ -26,8 +28,12 @@ e() {
 }
 
 if [ x"$1" = x"-n" ]; then
- [ $# -eq 2 ] && n "$2" "$SHELL"
- [ $# -eq 3 ] && n "$2" "$3"
+  shift
+  NAME=$1
+  shift
+  ARG_COUNT=$#
+ [ $ARG_COUNT -eq 0 ] && n "$NAME" "$SHELL"
+ [ $ARG_COUNT -gt 0 ] && n "$NAME" "$@"
  usage
 elif [ x"$1" = x"-l" ]; then
  [ $# -eq 1 ] && l
